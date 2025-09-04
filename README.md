@@ -5,5 +5,7 @@ Post Data Fetching
 POST
 at localhost:3000
 project view
-<img width="1920" height="1128" alt="image" src="https://github.com/user-attachments/assets/6f49ae20-ef1a-417f-87df-7230b1270b8d" />
-<img width="1920" height="1128" alt="image" src="https://github.com/user-attachments/assets/967a5e70-544d-4d30-9580-18b0b0dc3e43" />
+<img width="1920" height="1128" alt="image" src="https://github.com/user-attachments/assets/bff4971e-afbc-4728-a0c4-fe811dbc66e7" />
+<img width="1920" height="1128" alt="image" src="https://github.com/user-attachments/assets/25bb8cdf-d1af-4d56-9ad6-9496db77f47a" />
+
+
