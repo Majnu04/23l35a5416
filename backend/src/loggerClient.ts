@@ -5,13 +5,13 @@ import { Log } from '../../logging-middleware/src/index';
 const AUTH_CONFIG = {
   authUrl: 'http://20.244.56.144/evaluation-service/auth',
   authBody: {
-    email: 'student@affordmed.com',
-    name: 'Student Name',
-    rollNo: 'YOUR_ROLL_NO',
-    accessCode: 'ACCESS_CODE',
-    clientID: 'CLIENT_ID', 
-    clientSecret: 'CLIENT_SECRET'
-  }
+    "email": "23l35a5416@gmail.com",
+    "name": "nelam gowri sankar",
+    "rollNo": "23l35a5416",
+    "accessCode": "YzuJeU",
+    "clientID": "82c72065-22e8-4bd4-a3e1-8b26d7713298",
+    "clientSecret": "sxtVWfnVRGPVYJEA"
+}
 };
 
 export async function logInfo(pkg: string, message: string, meta?: Record<string, any>) {
