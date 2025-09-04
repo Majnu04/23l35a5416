@@ -39,7 +39,7 @@ app.post('/shorturls', async (req, res) => {
     }
 
     // Check if custom shortcode already exists (avoid duplicates)
-    if (shortcode && urlStore.getByShortcode(shortcode)) {
+    if (shortcode && await urlStore.getByShortcode(shortcode)) {
       await logError('route', 'Shortcode already exists', { shortcode });
       return res.status(400).json({ error: 'Shortcode already exists' });
     }
@@ -50,7 +50,7 @@ app.post('/shorturls', async (req, res) => {
       // Keep generating until we get a unique one
       do {
         finalShortcode = generateShortcode();
-      } while (urlStore.getByShortcode(finalShortcode));
+      } while (await urlStore.getByShortcode(finalShortcode));
     }
 
     // Calculate expiry date (default: 30 days from now)
@@ -69,7 +69,7 @@ app.post('/shorturls', async (req, res) => {
     };
 
     // Save to our in-memory store
-    urlStore.create(shortUrl);
+    await urlStore.create(shortUrl);
 
     // Build the full short link URL
     const shortLink = `http://localhost:${PORT}/${finalShortcode}`;
@@ -96,7 +96,7 @@ app.get('/shorturls/:code', async (req, res) => {
     const { code } = req.params;
     
     // Look up the shortcode in our store
-    const shortUrl = urlStore.getByShortcode(code);
+    const shortUrl = await urlStore.getByShortcode(code);
 
     if (!shortUrl) {
       await logError('route', 'Short URL not found', { code });
@@ -128,7 +128,19 @@ app.get('/shorturls/:code', async (req, res) => {
   }
 });
 
-// 3. Redirect Endpoint (The magic happens here!)
+// 3. Health Check Endpoint (For testing if server is running)
+app.get('/health', async (req, res) => {
+  await logInfo('route', 'Health check requested');
+  
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    message: 'URL Shortener API is running smoothly! ',
+    version: '1.0.0'
+  });
+});
+
+// 4. Redirect Endpoint (The magic happens here!)
 // GET /:code - This is what happens when someone clicks a short URL
 app.get('/:code', async (req, res) => {
   try {
@@ -139,11 +151,10 @@ app.get('/:code', async (req, res) => {
       return res.status(404).end();
     }
 
-    console.log('🔗 Redirect requested for shortcode:', code);
-    const shortUrl = urlStore.getByShortcode(code);
+    await logInfo('route', 'Redirect requested', { code });
+    const shortUrl = await urlStore.getByShortcode(code);
 
     if (!shortUrl) {
-
       await logError('route', 'Short URL not found for redirect', { code });
       return res.status(404).json({ error: 'Short URL not found' });
     }
@@ -156,12 +167,12 @@ app.get('/:code', async (req, res) => {
     }
 
     // Increment click counter (analytics!)
-    urlStore.incrementClick(code);
-    ;
+    await urlStore.incrementClick(code);
 
     await logInfo('route', 'Redirecting to original URL', { 
       code, 
-      originalUrl: shortUrl.originalUrl 
+      originalUrl: shortUrl.originalUrl,
+      newClickCount: shortUrl.clicks + 1
     });
 
     // Perform the redirect (HTTP 302)
@@ -174,23 +185,19 @@ app.get('/:code', async (req, res) => {
   }
 });
 
-// 4. Health Check Endpoint (For testing if server is running)
-app.get('/health', (req, res) => {
-
-  res.json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    message: 'URL Shortener API is running smoothly! 🚀',
-    version: '1.0.0'
-  });
-});
-
 // ============== SERVER STARTUP ==============
 
 // Start the server
 app.listen(PORT, () => {
- 
+  const serverInfo = {
+    port: PORT,
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  };
   
-  // Log to external service
-  logInfo('service', `URL Shortener server started successfully on port ${PORT}`);
+  console.log(` URL Shortener server started on port ${PORT}`);
+  
+  // Log to external service (non-blocking)
+  logInfo('service', `URL Shortener server started successfully on port ${PORT}`, serverInfo)
+    .catch(err => console.error('Logging failed:', err));
 });

@@ -1,26 +1,36 @@
 // frontend/src/loggerClient.ts
-// Note: In a real implementation, you'd need to configure this properly
-// For now, this is a stub that follows the logging middleware pattern
+import { Log } from '../../logging-middleware/src/index';
 
-export type Level = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+// Auth configuration for logging
+const AUTH_CONFIG = {
+  authUrl: 'http://20.244.56.144/evaluation-service/auth',
+  authBody: {
+    "email": "23l35a5416@gmail.com",
+    "name": "nelam gowri sankar",
+    "rollNo": "23l35a5416",
+    "accessCode": "YzuJeU",
+    "clientID": "82c72065-22e8-4bd4-a3e1-8b26d7713298",
+    "clientSecret": "sxtVWfnVRGPVYJEA"
 
-// Stub implementation for frontend logging
+  }
+};
+
 export async function logInfo(pkg: string, message: string, meta?: Record<string, any>) {
-  // In production, this would use the logging middleware
-  console.log(`[INFO] ${pkg}: ${message}`, meta);
+  await Log('frontend', 'info', pkg, message, meta, AUTH_CONFIG);
 }
 
 export async function logError(pkg: string, message: string, meta?: Record<string, any>) {
-  // In production, this would use the logging middleware
-  console.error(`[ERROR] ${pkg}: ${message}`, meta);
+  await Log('frontend', 'error', pkg, message, meta, AUTH_CONFIG);
 }
 
 export async function logWarn(pkg: string, message: string, meta?: Record<string, any>) {
-  // In production, this would use the logging middleware
-  console.warn(`[WARN] ${pkg}: ${message}`, meta);
+  await Log('frontend', 'warn', pkg, message, meta, AUTH_CONFIG);
 }
 
 export async function logDebug(pkg: string, message: string, meta?: Record<string, any>) {
-  // In production, this would use the logging middleware
-  console.debug(`[DEBUG] ${pkg}: ${message}`, meta);
+  await Log('frontend', 'debug', pkg, message, meta, AUTH_CONFIG);
+}
+
+export async function logFatal(pkg: string, message: string, meta?: Record<string, any>) {
+  await Log('frontend', 'fatal', pkg, message, meta, AUTH_CONFIG);
 }

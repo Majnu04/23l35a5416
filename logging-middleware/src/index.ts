@@ -1,5 +1,15 @@
 
-import fetch from 'node-fetch';
+// Conditional import for fetch - use node-fetch in Node.js, global fetch in browsers
+let fetchFunction: typeof fetch;
+
+if (typeof window !== 'undefined') {
+  // Browser environment - use global fetch
+  fetchFunction = window.fetch.bind(window);
+} else {
+  // Node.js environment - use node-fetch
+  const nodeFetch = require('node-fetch');
+  fetchFunction = nodeFetch;
+}
 
 export type Stack = 'backend' | 'frontend';
 export type Level = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
@@ -18,10 +28,11 @@ let token: string | null = null;
 let tokenExpiry = 0;
 
 async function obtainToken(authUrl: string, authBody: any) {
-
   try {
-    const res = await fetch(authUrl, {
-      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(authBody)
+    const res = await fetchFunction(authUrl, {
+      method: 'POST', 
+      headers: {'Content-Type':'application/json'}, 
+      body: JSON.stringify(authBody)
     });
     const data = await res.json();
     if (data && data.access_token) {
@@ -68,9 +79,12 @@ export async function Log(
   const headers: any = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  
   try {
-    await fetch(logUrl, { method: 'POST', headers, body: JSON.stringify(logPayload) });
+    await fetchFunction(logUrl, { 
+      method: 'POST', 
+      headers, 
+      body: JSON.stringify(logPayload) 
+    });
   } catch (e) {
     // noop: (as per requirement, do not block app)
   }

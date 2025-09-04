@@ -1,10 +1,17 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Log = void 0;
-const node_fetch_1 = __importDefault(require("node-fetch"));
+// Conditional import for fetch - use node-fetch in Node.js, global fetch in browsers
+let fetchFunction;
+if (typeof window !== 'undefined') {
+    // Browser environment - use global fetch
+    fetchFunction = window.fetch.bind(window);
+}
+else {
+    // Node.js environment - use node-fetch
+    const nodeFetch = require('node-fetch');
+    fetchFunction = nodeFetch;
+}
 const ALLOWED = {
     stack: ['backend', 'frontend'],
     level: ['debug', 'info', 'warn', 'error', 'fatal'],
@@ -18,8 +25,10 @@ let token = null;
 let tokenExpiry = 0;
 async function obtainToken(authUrl, authBody) {
     try {
-        const res = await (0, node_fetch_1.default)(authUrl, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authBody)
+        const res = await fetchFunction(authUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(authBody)
         });
         const data = await res.json();
         if (data && data.access_token) {
@@ -61,7 +70,11 @@ async function Log(stack, level, pkg, message, meta, opts) {
     if (token)
         headers['Authorization'] = `Bearer ${token}`;
     try {
-        await (0, node_fetch_1.default)(logUrl, { method: 'POST', headers, body: JSON.stringify(logPayload) });
+        await fetchFunction(logUrl, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(logPayload)
+        });
     }
     catch (e) {
         // noop: (as per requirement, do not block app)

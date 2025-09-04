@@ -29,3 +29,7 @@ export async function logWarn(pkg: string, message: string, meta?: Record<string
 export async function logDebug(pkg: string, message: string, meta?: Record<string, any>) {
   await Log('backend', 'debug', pkg, message, meta, AUTH_CONFIG);
 }
+
+export async function logFatal(pkg: string, message: string, meta?: Record<string, any>) {
+  await Log('backend', 'fatal', pkg, message, meta, AUTH_CONFIG);
+}

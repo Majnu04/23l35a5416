@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import { 
   Container, 
@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import ShortenerForm from './components/ShortenerForm';
 import StatsPage from './components/StatsPage';
+import { logInfo, logError } from './loggerClient';
 
 // Minimal black and white theme
 const theme = createTheme({
@@ -108,9 +109,67 @@ function a11yProps(index: number) {
 function App() {
   const [currentTab, setCurrentTab] = useState(0);
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+  // Set up global error handling
+  useEffect(() => {
+    const handleUnhandledError = (event: ErrorEvent) => {
+      logError('app', 'Unhandled JavaScript error', {
+        message: event.message,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno
+      });
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      logError('app', 'Unhandled Promise rejection', {
+        reason: event.reason?.toString() || 'Unknown reason'
+      });
+    };
+
+    // Application startup logging
+    logInfo('app', 'URL Shortener application started', {
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href
+    });
+
+    window.addEventListener('error', handleUnhandledError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleUnhandledError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
+
+  const handleTabChange = async (_: React.SyntheticEvent, newValue: number) => {
+    const tabNames = ['Create Link', 'Statistics'];
+    
+    await logInfo('component', 'Tab changed', {
+      fromTab: currentTab,
+      toTab: newValue,
+      tabName: tabNames[newValue]
+    });
+    
     setCurrentTab(newValue);
   };
+
+  // Log page visibility changes
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        logInfo('app', 'Application hidden');
+      } else {
+        logInfo('app', 'Application visible');
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>

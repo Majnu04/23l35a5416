@@ -257,7 +257,7 @@ const StatsPage: React.FC = () => {
                           <TableCell>
                             <Typography 
                               component="a" 
-                              href={`http://localhost:5000/${searchCode}`} 
+                              href={`http://localhost:3000/${searchCode}`} 
                               target="_blank" 
                               rel="noopener noreferrer"
                               sx={{ 
@@ -266,7 +266,7 @@ const StatsPage: React.FC = () => {
                                 '&:hover': { textDecoration: 'underline' }
                               }}
                             >
-                              http://localhost:5000/{searchCode}
+                              http://localhost:3000/{searchCode}
                             </Typography>
                           </TableCell>
                         </TableRow>
@@ -295,7 +295,7 @@ const StatsPage: React.FC = () => {
                     <Button 
                       variant="outlined" 
                       size="small"
-                      onClick={() => window.open(`http://localhost:5000/${searchCode}`, '_blank')}
+                      onClick={() => window.open(`http://localhost:3000/${searchCode}`, '_blank')}
                     >
                       Visit Link
                     </Button>
